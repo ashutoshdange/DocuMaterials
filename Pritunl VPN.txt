@@ -1,0 +1,62 @@
+Pritunl VPN
+
+Use ubuntu 20.04
+
+Step 1
+Deploy a server with ubuntu 20.04
+
+Step 2 
+Enable public IP and create a security group with ports open---> ssh,http,https and udp(1194).
+
+Step 3
+Select root volume 30GB
+
+Step 4
+In user data section paste the following script::
+
+***********************************************************************
+
+#!/bin/bash
+sudo apt-get update
+sudo apt-get -y upgrade
+sudo apt-get install curl gnupg2 wget unzip -y
+apt-get update
+apt-get install mongodb-server -y
+sudo systemctl start mongodb
+apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv E162F504A20CDF15827F718D4B7C549A058F8B6B
+apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+apt-get install pritunl -y
+sudo systemctl start pritunl
+sudo systemctl enable pritunl mongodb
+
+************************************************************************
+
+Step 5 
+Copy and paste the public IP of server in browser 
+
+Step 6
+
+Then, for the setup key use following command
+---sudo pritunl setup-key---
+
+Step 7
+
+For the UserName and Password Use following command
+---pritunl default-password---
+
+Step 8
+
+Add organization
+Add User
+(already done in step 2 if not add port in inbound rules)Add Server (Set port to “1194” and”UDP” )
+Attach Organization
+Start Server
+Download user profile
+
+Step 9
+
+Install and open PritunlVPN
+Import downloaded (.tar) file
+And click on connect
+
+Link :: https://aws.plainenglish.io/self-hosted-pritunl-vpn-in-aws-fc9c204c7cbd

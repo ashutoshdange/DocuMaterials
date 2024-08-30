@@ -1,0 +1,79 @@
+**********************************Create a Custom metric of Memory and Disk utilization with CWagent***********************************************
+
+
+reference:  https://www.wellarchitectedlabs.com/cost/200_labs/200_aws_resource_optimization/4_memory_plugin/
+
+Step1:create a role with attached policy "CloudWatchAgentServerPolicy"
+
+Step2:click on actions of Instance select security and select modify IAM role and attach the new role created.
+
+Step3:Download the Zip File of Cloudwatch Agent:
+	wget https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+
+Step4: Unzip the Cloudwatch Agent File
+	 unzip AmazonCloudWatchAgent.zip
+
+Step5: sudo ./install.sh
+
+Step6: sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
+
+On which OS are you planning to use the agent?	1. Linux
+Are you using EC2 or On-Premises hosts?	1. EC2
+Which user are you planning to run the agent?	2. cwagent
+Do you want to turn on StatsD daemon?	2. No
+Do you want to monitor metrics from CollectD?	2. No
+Do you want to monitor any host metrics?	1. Yes
+Do you want to monitor cpu metrics per core?	2. No
+Do you want to add ec2 dimensions?	1. Yes
+Would you like to collect your metrics at high resolution?	4. 60s
+Which default metrics config do you want?	1. Basic
+Are you satisfied with the above config?	1. Yes
+Do you have any existing CloudWatch Log Agent?	2. No
+Do you want to monitor any log files?	2. No
+Do you want to store the config in the SSM parameter store?	2. No
+
+
+Step6: paste the Script in the file of config.Json
+	sudo /opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+*****************Script**************************************
+	{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "run_as_user": "cwagent"
+  },
+  "metrics": {
+    "append_dimensions": {
+        "InstanceId": "${aws:InstanceId}"
+    },
+    "metrics_collected": {
+          "mem":{
+            "measurement":[
+               "mem_used_percent"
+            ],
+             "metrics_collection_interval":60
+            },
+      "disk": {
+        "measurement": [
+          "used_percent"
+        ],
+        "metrics_collection_interval": 60,
+        "resources": [
+          "/"
+        ]
+      }
+    }
+  }
+}
+
+*********************************************************************
+Step7:
+
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s
+
+Step8:
+
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+
+
+

@@ -1,0 +1,64 @@
+EBS & Memory Metrics creation on Windows server
+
+Reference Website link: https://adamtheautomator.com/cloudwatch-agent/#Creating_an_IAM_Role
+
+
+
+****************************Steps***********************************
+
+1.Create IAM Role with Agent servery policy
+2.Attach the role to the windows server 
+3.Connect to Server 
+4.Open powershell in windows server and run it as administrator
+5.Use the command to download cloudwatch agent
+ "Invoke-WebRequest -Uri https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi -OutFile $env:USERPROFILE\Desktop\amazon-cloudwatch-agent.msi"
+
+6.Verify 
+	#Verify Amazone CloudWatch Agent was successful.
+ Test-Path -Path $env:USERPROFILE\Desktop\amazon-cloudwatch-agent.msi
+7.Cloudwatch agent installation
+	#Install the CloudWatch Agent
+ msiexec /i $env:USERPROFILE\Desktop\amazon-cloudwatch-agent.msi
+
+8.launch cloudwatch agent
+	#Launch the amazon-cloudwatch-agent-config-wizard.exe executable
+ & $env:ProgramFiles\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-config-wizard.exe
+
+9.A config.json will be created in Administrator folder in C Drive of Windows server
+10.Move that file to Program files/Amazon/amazoncloudwatchagent/ folder
+11.Open the config.json file and paste the following script:
+	
+	{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "run_as_user": "cwagent"
+  },
+  "metrics": {
+    "append_dimensions": {
+        "InstanceId": "${aws:InstanceId}"
+    },
+    "metrics_collected": {
+          "mem":{
+            "measurement":[
+               "mem_used_percent"
+            ],
+             "metrics_collection_interval":60
+            },
+      "disk": {
+        "measurement": [
+          "used_percent"
+        ],
+        "metrics_collection_interval": 60,
+        "resources": [
+          "/"
+        ]
+      }
+    }
+  }
+}
+
+12.Now in powershell run the following command :
+	#Apply CloudWatch Agent Configuration
+ & $env:ProgramFiles\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c file:$env:ProgramFiles\Amazon\AmazonCloudWatchAgent\config.json -s
+13.Amazoncloudwatchagent will stop and then start and after few minutes metrics will be created in cloudwatch agent.
+

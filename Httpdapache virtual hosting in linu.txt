@@ -1,0 +1,25 @@
+Httpd/apache virtual hosting in linux
+
+
+
+
+<VirtualHost *:80>
+     ServerName abslms.irujul.com
+     Redirect / https://abslms.irujul.com
+</VirtualHost>
+<VirtualHost *:443>
+     DocumentRoot /var/www/html/abslms
+     ServerName abslms.irujul.com
+     <Directory "/var/www/html/abslms">
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Order allow,deny
+    Allow from all
+    #</Directory>
+     #SSLEngine on
+     #SSLCertificateFile /etc/httpd/ssl/irujul.crt
+     #SSLCertificateKeyFile /etc/httpd/ssl/irujul.key
+     #SSLCACertificateFile /etc/httpd/ssl/irujul_intermediate.crt
+     #ErrorLog /var/log/httpd/abs-error.log
+     #CustomLog /var/log/httpd/abs.log common
+</VirtualHost>
